@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portal de Insumos · TechnoFood</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@200;300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--tita:#80E593;--cyan:#52C7CF;--bg:#f6f6f3;--white:#fff;--ink:#1a1a1a;--mid:#555;--muted:#999;--faint:#e5e5e0;--warn:#c8773a;--danger:#c04040;--success:#2a8a4a}
+html,body{height:100%;font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--ink)}
+button{font-family:'Be Vietnam Pro',sans-serif;cursor:pointer}
+input,textarea{font-family:'Be Vietnam Pro',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--faint);border-radius:99px}
+.view{display:none;min-height:100vh}.view.active{display:flex;flex-direction:column}
+
+/* LOGIN */
+#v-login{align-items:center;justify-content:center;padding:40px 20px;background:var(--bg)}
+.lcard{width:100%;max-width:420px}
+.llogos{display:flex;align-items:center;justify-content:flex-start;margin-bottom:44px}
+.ldiv{width:1px;height:36px;background:var(--faint)}
+.leyebrow{font-size:10px;letter-spacing:.15em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.lh1{font-family:'Be Vietnam Pro',sans-serif;font-size:30px;font-weight:300;line-height:1.2;margin-bottom:8px}
+.lsub{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:32px}
+.lbox{background:var(--white);border:1px solid var(--faint);border-radius:14px;padding:28px}
+.lfl{margin-bottom:16px}
+.llbl{display:block;font-size:11px;color:var(--mid);margin-bottom:6px;letter-spacing:.05em}
+.linp{width:100%;border:1px solid var(--faint);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--ink);background:#fafaf8;outline:none;transition:border-color .15s}
+.linp:focus{border-color:var(--cyan)}
+.lbtn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:500;letter-spacing:.03em;margin-top:4px;transition:opacity .15s}
+.lbtn:hover{opacity:.85}
+.lerr{display:none;margin-bottom:14px;padding:10px 14px;background:#fef0f0;border:1px solid #f5c4c4;border-radius:8px;font-size:13px;color:var(--danger)}
+.lerr.show{display:block}
+.lhint{margin-top:16px;padding:12px 16px;background:var(--white);border:1px solid var(--faint);border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7}
+.lhint code{background:#f0f0ed;padding:1px 6px;border-radius:4px;font-size:11px;color:var(--mid)}
+
+/* APP */
+#v-app{flex-direction:column}
+.topbar{background:var(--white);border-bottom:1px solid var(--faint);padding:0 32px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;flex-shrink:0}
+.tbl{display:flex;align-items:center;gap:20px}
+.tbdiv{width:1px;height:28px;background:var(--faint)}
+.tbr{display:flex;align-items:center;gap:12px}
+.tbstats{display:flex;align-items:baseline;gap:16px}
+.stbig{font-size:24px;font-weight:300;line-height:1}
+.stsup{font-size:13px;color:var(--muted)}
+.stlbl{font-size:11px;color:var(--muted)}
+.upill{font-size:12px;color:var(--muted);padding:5px 10px;border:1px solid var(--faint);border-radius:99px}
+.logoutb{font-size:12px;color:var(--muted);padding:5px 12px;border:1px solid var(--faint);border-radius:99px;background:none;transition:all .15s}
+.logoutb:hover{background:var(--faint)}
+
+.mbar{background:var(--white);border-bottom:1px solid var(--faint);padding:10px 32px;display:flex;align-items:center;gap:20px;flex-shrink:0}
+.mtrack{flex:1;background:#eeede8;border-radius:99px;height:6px;overflow:hidden}
+.mfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--tita));border-radius:99px;transition:width .45s ease}
+.bmini{text-align:center;cursor:pointer}
+.bmpct{font-size:13px;font-weight:500;line-height:1}
+.bmnum{font-size:9px;color:var(--muted);letter-spacing:.07em;margin-top:2px}
+
+.tabs{background:var(--white);border-bottom:1px solid var(--faint);padding:0 32px;display:flex;overflow-x:auto;flex-shrink:0}
+.tabs::-webkit-scrollbar{height:0}
+.tabbt{padding:14px 20px;background:none;border:none;border-bottom:2.5px solid transparent;font-size:13px;color:var(--muted);font-weight:400;white-space:nowrap;transition:all .15s}
+.tabbt.active{color:var(--ink);font-weight:500}
+
+.carea{flex:1;overflow-y:auto;padding:40px 32px;max-width:920px;margin:0 auto;width:100%}
+
+/* SECTION */
+.seyebrow{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.sh2{font-family:'Be Vietnam Pro',sans-serif;font-size:30px;font-weight:300;margin-bottom:8px}
+.smeta{display:flex;align-items:center;gap:14px;margin-bottom:36px}
+.smetatxt{font-size:13px;color:var(--muted)}
+.strack{flex:1;max-width:200px;background:#eeede8;border-radius:99px;height:4px;overflow:hidden}
+.sfill{height:100%;border-radius:99px;transition:width .4s}
+.spct{font-size:13px;font-weight:500}
+.nota{margin-bottom:24px;padding:12px 16px;background:#fffbf0;border-left:3px solid var(--warn);border-radius:0 8px 8px 0;font-size:13px;color:#7a4500;line-height:1.5}
+
+/* ITEM CARD */
+.icard{background:var(--white);border:1px solid var(--faint);border-radius:13px;padding:20px 22px;margin-bottom:10px;transition:border-color .2s}
+.icard.filled{border-color:#52C7CF88}
+.itop{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.ichk{width:22px;height:22px;border-radius:50%;background:#eeede8;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:background .2s}
+.ichk.done{background:var(--cyan)}
+.iinfo{flex:1}
+.ilabel{font-size:14px;color:var(--ink);line-height:1.4;margin-bottom:5px}
+.ibadges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
+.badge{font-size:10px;padding:2px 8px;border-radius:99px;letter-spacing:.05em}
+.breq{color:#0f6e7a}
+.bopc{background:#f0f0ed;color:var(--muted)}
+.btipo{background:#f0f0ed;color:var(--muted)}
+
+/* DESCRIPTION BOX */
+.idesc{margin-bottom:12px;padding:10px 14px;background:#f8f8f5;border-left:2.5px solid #ddd;border-radius:0 8px 8px 0;font-size:12px;color:var(--mid);line-height:1.6}
+.idesc strong{color:var(--ink);font-weight:500}
+.idesc ul{margin:4px 0 0 14px}
+.idesc ul li{margin-bottom:2px}
+
+/* CONFIRM */
+.crow{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;border:1px solid var(--faint);background:#fafaf8;cursor:pointer;transition:all .2s;user-select:none}
+.crow.ck{background:#52C7CF0e;border-color:#52C7CF55}
+.cbox{width:18px;height:18px;border-radius:5px;border:1.5px solid #ccc;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.cbox.ck{background:var(--cyan);border-color:var(--cyan)}
+.ctxt{font-size:13px;color:var(--muted);transition:color .2s}
+.crow.ck .ctxt{color:var(--ink)}
+
+/* TEXTAREA */
+.ita{width:100%;border:1px solid var(--faint);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--ink);background:#fafaf8;outline:none;resize:vertical;line-height:1.55;transition:border-color .15s}
+.ita:focus{border-color:var(--cyan)}
+
+/* DROPZONE */
+.dz{border:1.5px dashed #d5d5d0;border-radius:11px;padding:20px;text-align:center;cursor:pointer;background:#fafaf8;transition:all .2s}
+.dz:hover,.dz.drag{border-color:var(--cyan);background:#f0fcfc}
+.dzico{font-size:22px;margin-bottom:8px;color:var(--muted)}
+.dztxt{font-size:13px;color:var(--muted)}
+.dzsub{font-size:11px;color:#bbb;margin-top:4px}
+.flist{margin-bottom:10px}
+.frow{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:4px;font-size:12px}
+.fname{color:var(--cyan)}
+.fsize{color:var(--muted)}
+.fwarn{color:var(--warn);font-size:10px}
+.frm{color:var(--danger);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;background:none;border:none}
+.dzmore{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* NAV */
+.navrow{display:flex;justify-content:space-between;align-items:center;margin-top:40px;padding-top:24px;border-top:1px solid var(--faint)}
+.navbtns{display:flex;gap:8px}
+.btnav{padding:9px 18px;background:var(--white);border:1px solid var(--faint);border-radius:8px;font-size:13px;color:var(--mid);transition:all .15s}
+.btnav:hover{border-color:var(--muted)}
+.btsub{padding:11px 28px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:500;letter-spacing:.02em;transition:opacity .15s}
+.btsub:hover{opacity:.85}
+.btsub:disabled{opacity:.5;cursor:default}
+.subok{margin-top:16px;padding:14px;background:#f0fdf4;border:1px solid #80E59360;border-radius:9px;font-size:13px;color:var(--success);text-align:center;line-height:1.6}
+.suberr{margin-top:16px;padding:14px;background:#fef0f0;border:1px solid #f5c4c4;border-radius:9px;font-size:13px;color:var(--danger);text-align:center}
+.subprog{margin-top:14px;padding:12px 16px;background:#f0f8ff;border:1px solid #b0d8f0;border-radius:9px;font-size:13px;color:#1a5a8a;text-align:center}
+
+/* UPLOAD OVERLAY */
+.uoverlay{position:fixed;inset:0;background:rgba(26,26,26,.6);z-index:500;display:flex;align-items:center;justify-content:center}
+.umodal{background:#fff;border-radius:16px;padding:36px 40px;max-width:380px;width:90%;text-align:center}
+.umod-icon{font-size:32px;margin-bottom:16px}
+.umod-title{font-size:18px;font-weight:500;margin-bottom:8px}
+.umod-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.uprogbar{background:#eeede8;border-radius:99px;height:6px;overflow:hidden;margin-bottom:8px}
+.uprogfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--tita));border-radius:99px;transition:width .3s ease}
+.uprogpct{font-size:12px;color:var(--muted)}
+
+/* DASHBOARD */
+.deyebrow{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.dh2{font-family:'Be Vietnam Pro',sans-serif;font-size:30px;font-weight:300;margin-bottom:6px}
+.dsub{font-size:13px;color:var(--muted);margin-bottom:36px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
+.kcard{background:var(--white);border:1px solid var(--faint);border-radius:13px;padding:18px 20px}
+.klbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.kval{font-size:28px;font-weight:300;line-height:1;margin-bottom:5px}
+.ksub{font-size:12px;color:var(--muted)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.ccard{background:var(--white);border:1px solid var(--faint);border-radius:13px;padding:22px}
+.cey{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.cleg{display:flex;gap:14px;margin-bottom:14px;font-size:12px;color:var(--muted)}
+.cleg span{display:flex;align-items:center;gap:5px}
+.ldot{width:10px;height:10px;border-radius:2px;display:inline-block}
+.bbars{display:flex;flex-direction:column;gap:14px}
+.bbrh{display:flex;justify-content:space-between;margin-bottom:5px}
+.bbrt{font-size:13px;color:var(--ink)}
+.bbrc{font-size:13px;font-weight:500}
+.bbrtr{background:#eeede8;border-radius:99px;height:6px;overflow:hidden}
+.bbrf{height:100%;border-radius:99px;transition:width .4s}
+.bbrp{font-size:11px;color:var(--muted);text-align:right;margin-top:3px}
+.detcard{background:var(--white);border:1px solid var(--faint);border-radius:13px;padding:22px;margin-bottom:20px}
+.detey{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.bdh{display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1.5px solid #f0f0ed;margin-bottom:10px}
+.bdnum{font-size:13px;font-weight:500}
+.bdtit{font-size:14px;font-weight:500}
+.bdcnt{font-size:12px;color:var(--muted);margin-left:auto}
+.bdmb{width:60px;background:#eeede8;border-radius:99px;height:4px;overflow:hidden}
+.bdmf{height:100%;border-radius:99px}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.idet{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px}
+.idet.dr{background:#52C7CF0a}
+.idot{font-size:12px}
+.idlbl{font-size:12px;flex:1;line-height:1.3}
+.idopc{font-size:9px;color:#ccc}
+.snote{padding:14px 18px;background:#f0fdf6;border:1px solid #80E59350;border-radius:10px;font-size:12px;color:var(--success);line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="v-login" class="view active">
+  <div class="lcard">
+    <div class="llogos" style="justify-content:flex-start;margin-bottom:44px">
+      <svg width="220" height="46" viewBox="0 0 220 46" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Tita Media">
+        <text x="110" y="26" text-anchor="middle" font-family="'Be Vietnam Pro', Georgia, 'Times New Roman', serif" font-size="24" font-weight="300" letter-spacing="6" fill="#111111">TITA MEDIA</text>
+        <text x="110" y="40" text-anchor="middle" font-family="'Be Vietnam Pro', 'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="300" letter-spacing="4" fill="#999999">OUTSTANDING PERFORMANCE</text>
+      </svg>
+    </div>
+    <div class="leyebrow">Acceso al portal</div>
+    <h1 class="lh1">Insumos del<br>Proyecto TechnoFood</h1>
+    <p class="lsub">Portal seguro de entrega de documentación e información requerida por el equipo de Tita Media.</p>
+    <div class="lbox">
+      <div id="lerr" class="lerr">Usuario o contraseña incorrectos.</div>
+      <div class="lfl"><label class="llbl">Usuario</label><input id="liu" class="linp" placeholder="Ingresa tu usuario" autocomplete="username"/></div>
+      <div class="lfl"><label class="llbl">Contraseña</label><input id="lip" class="linp" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="lbtn" id="lbtn">Ingresar →</button>
+    </div>
+    <div class="lhint"><strong style="color:var(--mid)">Accesos:</strong><br>
+      Cliente: <code>technofood</code> / <code>tf2026</code><br>
+      PM Tita Media: <code>tita.pm</code> / <code>tita2026</code>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD OVERLAY -->
+<div id="uoverlay" class="uoverlay" style="display:none">
+  <div class="umodal">
+    <div class="umod-icon">☁️</div>
+    <div class="umod-title" id="umod-title">Enviando información…</div>
+    <div class="umod-sub" id="umod-sub">Guardando respuestas en Google Sheets y subiendo archivos a Drive. Por favor no cierres esta ventana.</div>
+    <div class="uprogbar"><div class="uprogfill" id="uprogfill" style="width:0%"></div></div>
+    <div class="uprogpct" id="uprogpct">0%</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="v-app" class="view">
+  <div class="topbar">
+    <div class="tbl">
+      <svg width="190" height="40" viewBox="0 0 220 46" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Tita Media">
+        <text x="110" y="26" text-anchor="middle" font-family="'Be Vietnam Pro', Georgia, 'Times New Roman', serif" font-size="24" font-weight="300" letter-spacing="6" fill="#111111">TITA MEDIA</text>
+        <text x="110" y="40" text-anchor="middle" font-family="'Be Vietnam Pro', 'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="300" letter-spacing="4" fill="#999999">OUTSTANDING PERFORMANCE</text>
+      </svg>
+    </div>
+    <div class="tbr">
+      <div class="tbstats">
+        <div><span class="stbig" id="stpct">0<span class="stsup">%</span></span><span class="stlbl"> completado</span></div>
+        <div><span class="stbig" id="stdone" style="color:var(--cyan)">0<span class="stsup">/26</span></span><span class="stlbl"> insumos</span></div>
+      </div>
+      <div class="tbdiv"></div>
+      <div class="upill" id="ulabel">—</div>
+      <button class="logoutb" id="logoutb">Salir</button>
+    </div>
+  </div>
+
+  <div class="mbar">
+    <div class="mtrack"><div class="mfill" id="mfill" style="width:0%"></div></div>
+    <div id="bminis" style="display:flex;gap:20px"></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="carea" id="carea"></div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+// Reemplaza con la URL de tu Google Apps Script Web App desplegado
+const WEBHOOK = "TU_URL_APPS_SCRIPT_AQUI";
+
+const FILE_SIZE_LIMIT = 25 * 1024 * 1024; // 25 MB por archivo
+
+const USERS = [
+  {user:"technofood",pass:"tf2026",label:"TechnoFood",role:"client"},
+  {user:"tita.pm",pass:"tita2026",label:"Tita Media PM",role:"pm"},
+];
+
+// ── INSUMOS ─────────────────────────────────────────────────
+const BLOQUES = [
+ {id:"b1",num:"01",title:"Base & Accesos",semana:"Semana 1",accent:"#52C7CF",items:[
+  {id:"b1_1",label:"Confirmación formal del Product Owner + backup",tipo:"confirm",req:true,
+   desc:"Confirma que la persona responsable de aprobar decisiones del proyecto (Product Owner) ha sido designada formalmente, junto con su suplente o backup en caso de ausencia."},
+  {id:"b1_2",label:"Contacto técnico de SAMM (nombre, email, celular)",tipo:"texto",req:true,
+   desc:"Nombre completo, correo electrónico corporativo y número celular (con indicativo) de la persona técnica de SAMM que será el punto de contacto durante la integración.<br><strong>Formato:</strong> Nombre Apellido | correo@empresa.com | +57 300 000 0000"},
+  {id:"b1_3",label:"Manual de marca y branding completo",tipo:"archivo",req:true,
+   desc:"Documento con las guías oficiales de identidad visual: uso del logo, tipografías, colores, espaciados y normas de aplicación.<br><strong>Formato aceptado:</strong> PDF o DOCX · <strong>Peso máximo:</strong> 50 MB"},
+  {id:"b1_4",label:"Logo en vectoriales (SVG, AI) y versiones fondos claros/oscuros",tipo:"archivo",req:true,
+   desc:"Archivo vectorial del logo oficial en alta calidad. Incluir versiones para fondo blanco/claro y fondo negro/oscuro si existen.<br><strong>Formatos aceptados:</strong> .SVG, .AI, .EPS, .PDF · Incluir PNG en alta resolución como respaldo (mín. 1000px)"},
+  {id:"b1_5",label:"Documentación oficial de la API de SAMM",tipo:"archivo",req:true,
+   desc:"Documentación técnica completa de la API de SAMM: endpoints disponibles, métodos HTTP, autenticación, estructura de requests/responses y ejemplos de uso.<br><strong>Formatos aceptados:</strong> PDF, Postman Collection (.json), Swagger/OpenAPI (.yaml, .json)"},
+  {id:"b1_6",label:"Credenciales de ambiente sandbox de SAMM",tipo:"texto",req:true,
+   desc:"Usuario, contraseña, API key o token de acceso al ambiente de pruebas (sandbox) de SAMM. Este ambiente se usará para desarrollo e integración sin afectar producción.<br><strong>Incluir:</strong> URL base del sandbox + credenciales de acceso"},
+  {id:"b1_7",label:"Specs del servidor del middleware",tipo:"texto",req:true,
+   desc:"Características técnicas del servidor donde correrá el middleware de integración.<br><strong>Incluir:</strong> Sistema operativo, RAM, almacenamiento, CPU, IP pública, proveedor de hosting (AWS, Azure, GCP, otro)"},
+  {id:"b1_8",label:"Accesos SSH al servidor del middleware",tipo:"texto",req:true,
+   desc:"Credenciales de acceso SSH al servidor del middleware para configuración e instalación.<br><strong>Incluir:</strong> IP/host del servidor | Puerto SSH (usualmente 22) | Usuario | Contraseña o archivo .pem de llave privada"},
+ ]},
+ {id:"b2",num:"02",title:"Diseño & Marca",semana:"Semanas 1–2",accent:"#80E593",items:[
+  {id:"b2_1",label:"Sitios de referencia (mínimo 3, además de talsa.com.co)",tipo:"texto",req:true,
+   desc:"URLs de sitios web que representen el estilo visual, la experiencia o las funcionalidades que TechnoFood desea para su plataforma. Sirven como inspiración para el equipo de diseño.<br><strong>Formato:</strong> URL + breve descripción de por qué lo incluyes. Mínimo 3 sitios."},
+  {id:"b2_2",label:"Paleta de colores corporativa y tipografías oficiales",tipo:"archivo",req:true,
+   desc:"Definición de los colores oficiales de la marca (en códigos HEX, RGB o Pantone) y las fuentes tipográficas usadas en comunicaciones corporativas.<br><strong>Formatos:</strong> PDF, ASE (Adobe Swatch), imagen PNG/JPG, o documento de brand guidelines"},
+  {id:"b2_3",label:"Fotos institucionales (oficinas, equipo, clientes)",tipo:"archivo",req:true,
+   desc:"Fotografías de alta resolución para usar en el sitio web: instalaciones, equipo de trabajo, clientes o procesos. Deben ser fotos propias, no de stock.<br><strong>Formato:</strong> JPG o PNG · <strong>Resolución mínima:</strong> 1920×1080px · Subir como .ZIP si son múltiples"},
+  {id:"b2_4",label:"Videos institucionales",tipo:"archivo",req:false,opc:true,
+   desc:"Video(s) corporativo(s) para usar en el sitio. Si no cuentas con video institucional puedes omitir este campo.<br><strong>Formatos:</strong> MP4, MOV · <strong>Resolución mínima:</strong> 1080p · <strong>Peso máximo por archivo:</strong> 25 MB (archivos más grandes: comparte el link de Drive directamente en el campo de texto del bloque)"},
+  {id:"b2_5",label:"Número de WhatsApp comercial oficial",tipo:"texto",req:true,
+   desc:"Número de WhatsApp Business activo que se mostrará en el sitio para atención al cliente. Debe ser un número de WhatsApp Business (no personal).<br><strong>Formato:</strong> +57 300 000 0000 (con indicativo de país)"},
+  {id:"b2_6",label:"Emails destinatarios por tipo de formulario",tipo:"texto",req:true,
+   desc:"Direcciones de correo electrónico que recibirán los mensajes según el tipo de formulario del sitio (contacto general, soporte técnico, ventas, PQRS, etc.).<br><strong>Formato:</strong> Tipo de formulario → email@empresa.com"},
+  {id:"b2_7",label:"SLA prometido al cliente final (p.ej. respuesta en 24h hábiles)",tipo:"texto",req:true,
+   desc:"Tiempo máximo de respuesta que TechnoFood promete a sus clientes al enviar un formulario o solicitud. Se mostrará como mensaje de confirmación en el sitio.<br><strong>Ejemplo:</strong> 'Nos comunicaremos contigo en un máximo de 24 horas hábiles'"},
+ ]},
+ {id:"b3",num:"03",title:"Catálogo & Contenido",semana:"Semanas 2–4",accent:"#52C7CF",items:[
+  {id:"b3_1",label:"+70 categorías con descripciones cortas (50–100 palabras)",tipo:"archivo",req:true,
+   desc:"Listado de todas las categorías de productos con su nombre y una descripción breve de 50 a 100 palabras cada una. Estas aparecerán en el menú y páginas de categoría del ecommerce.<br><strong>Formato preferido:</strong> Excel (.xlsx) o Word (.docx) con columnas: Nombre categoría | Descripción | Categoría padre (si aplica)"},
+  {id:"b3_2",label:"+39 marcas: historia breve, logo HD, enfoque",tipo:"archivo",req:true,
+   desc:"Para cada marca que comercializa TechnoFood: nombre, historia o descripción corta (100–200 palabras), logo en alta resolución y enfoque o especialidad de la marca.<br><strong>Formato:</strong> Excel con la info + carpeta ZIP con los logos (PNG o SVG, fondo transparente preferiblemente)"},
+  {id:"b3_3",label:"Productos con specs técnicas estructuradas",tipo:"archivo",req:true,
+   desc:"Base de datos completa de productos con sus especificaciones técnicas. Cada producto debe tener: nombre, SKU/referencia, descripción, especificaciones técnicas, categoría, marca y precio.<br><strong>Formato preferido:</strong> Excel (.xlsx) o CSV · Columnas estándar: SKU | Nombre | Descripción | Especificaciones | Categoría | Marca | Precio"},
+  {id:"b3_4",label:"Rutas de alojamiento de las fichas técnicas",tipo:"texto",req:true,
+   desc:"URLs o rutas del servidor donde están almacenadas las fichas técnicas en PDF de los productos (si ya están en línea). Si están en un servidor FTP, indicar la ruta de acceso.<br><strong>Formato:</strong> URL completa o ruta FTP/servidor donde se encuentran los PDFs de fichas técnicas"},
+  {id:"b3_5",label:"Fotos por producto, mínimo 3, alta resolución",tipo:"archivo",req:true,
+   desc:"Fotografías de productos en alta resolución. Mínimo 3 fotos por producto (frontal, ángulo, detalle). Fondo blanco o neutro preferiblemente.<br><strong>Formato:</strong> JPG o PNG · <strong>Resolución mínima:</strong> 800×800px · Organizar en carpetas por SKU o nombre de producto · Comprimir en .ZIP"},
+  {id:"b3_6",label:"Videos por producto donde aplique",tipo:"archivo",req:false,opc:true,
+   desc:"Videos demostrativos o de producto para los artículos que lo requieran. Campo opcional — solo incluir si cuentas con este material.<br><strong>Formato:</strong> MP4 · Nombrar el archivo con el SKU o nombre del producto · Archivos >25MB: comparte link de Drive en texto"},
+  {id:"b3_7",label:"Mapeo industria – categoría – marca (Excel)",tipo:"archivo",req:false,opc:true,
+   desc:"Tabla que relacione cada industria o sector con sus categorías y marcas correspondientes. Sirve para construir la navegación y filtros del sitio.<br><strong>Formato:</strong> Excel (.xlsx) con columnas: Industria | Categoría | Subcategoría | Marca"},
+  {id:"b3_8",label:"Listado de productos destacados / más vendidos para home",tipo:"archivo",req:false,opc:true,
+   desc:"Lista de los productos que deben aparecer en la página de inicio (home) como destacados, recomendados o más vendidos. Máximo 20 productos.<br><strong>Formato:</strong> Excel o texto con SKU | Nombre del producto | Razón para destacar (opcional)"},
+ ]},
+ {id:"b4",num:"04",title:"Servicio Técnico & SAMM",semana:"Semanas 2–3",accent:"#80E593",
+  nota:"Este bloque depende del contacto técnico de SAMM (ítem #02). Se recomienda tenerlo definido antes de completar estos campos.",
+  items:[
+  {id:"b4_1",label:"Campos exactos que SAMM requiere para crear un ticket",tipo:"texto",req:true,
+   desc:"Lista detallada de todos los campos obligatorios y opcionales que el sistema SAMM necesita para registrar un ticket de servicio técnico. Esto define el formulario que verán los clientes en el sitio.<br><strong>Formato:</strong> Nombre del campo | Tipo (texto, número, lista, fecha) | Obligatorio (S/N) | Opciones si es lista desplegable"},
+  {id:"b4_2",label:"Tipos de servicio SAMM (preventivo, correctivo, garantía, repuesto, otros)",tipo:"texto",req:true,
+   desc:"Listado completo de los tipos o categorías de servicio técnico que maneja SAMM, tal como están configurados en el sistema. Estos se usarán como opciones en el formulario de solicitud.<br><strong>Formato:</strong> Lista de tipos de servicio con su nombre exacto en SAMM y una breve descripción de cuándo aplica cada uno"},
+ ]},
+];
+
+const TOTAL=BLOQUES.reduce((a,b)=>a+b.items.length,0);
+const TOTAL_REQ=BLOQUES.reduce((a,b)=>a+b.items.filter(i=>i.req).length,0);
+
+// ── STATE ────────────────────────────────────────────────────
+let S={
+  activeTab:"b1",
+  currentUser:null,
+  confirmed:{},
+  texts:{},
+  files:{},
+  submitting:false,
+  submitOk:false,
+  submitErr:false,
+  submitProgress:"",
+  submitSkipped:[],
+  dashChart:null
+};
+
+function isFilled(item){
+  if(item.tipo==="confirm") return !!S.confirmed[item.id];
+  if(item.tipo==="archivo") return (S.files[item.id]||[]).length>0;
+  return (S.texts[item.id]||"").trim()!=="";
+}
+function getStats(){
+  const done=BLOQUES.flatMap(b=>b.items).filter(i=>isFilled(i)).length;
+  const doneReq=BLOQUES.flatMap(b=>b.items).filter(i=>i.req&&isFilled(i)).length;
+  return{done,pct:Math.round(done/TOTAL*100),doneReq,pctReq:Math.round(doneReq/TOTAL_REQ*100)};
+}
+function bstat(b){const done=b.items.filter(i=>isFilled(i)).length;return{done,total:b.items.length,pct:Math.round(done/b.items.length*100)};}
+
+// ── AUTH ─────────────────────────────────────────────────────
+document.getElementById("lbtn").onclick=doLogin;
+document.getElementById("lip").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("logoutb").onclick=()=>{
+  S.currentUser=null;S.activeTab="b1";
+  document.getElementById("v-app").classList.remove("active");
+  document.getElementById("v-login").classList.add("active");
+  document.getElementById("liu").value="";document.getElementById("lip").value="";
+};
+function doLogin(){
+  const u=document.getElementById("liu").value.trim(),p=document.getElementById("lip").value;
+  const m=USERS.find(x=>x.user===u&&x.pass===p);
+  if(m){
+    S.currentUser=m;
+    document.getElementById("lerr").classList.remove("show");
+    document.getElementById("v-login").classList.remove("active");
+    document.getElementById("v-app").classList.add("active");
+    document.getElementById("ulabel").textContent=m.label;
+    buildTabs();render();
+  } else document.getElementById("lerr").classList.add("show");
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function buildTabs(){
+  const nav=document.getElementById("tabs");nav.innerHTML="";
+  BLOQUES.forEach(b=>{
+    const btn=document.createElement("button");
+    btn.className="tabbt";btn.dataset.tab=b.id;
+    btn.innerHTML=`${b.num} · ${b.title} <span data-cnt="${b.id}" style="font-size:11px"></span>`;
+    btn.onclick=()=>{S.activeTab=b.id;render();};
+    nav.appendChild(btn);
+  });
+  const d=document.createElement("button");
+  d.className="tabbt";d.dataset.tab="dashboard";d.textContent="📊 Dashboard";
+  d.onclick=()=>{S.activeTab="dashboard";render();};
+  nav.appendChild(d);
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  const stats=getStats();
+  document.getElementById("stpct").innerHTML=stats.pct+'<span class="stsup">%</span>';
+  document.getElementById("stdone").innerHTML=stats.done+'<span class="stsup">/'+TOTAL+'</span>';
+  document.getElementById("mfill").style.width=stats.pct+"%";
+  const mc=document.getElementById("bminis");mc.innerHTML="";
+  BLOQUES.forEach(b=>{const s=bstat(b);const d=document.createElement("div");d.className="bmini";
+    d.innerHTML=`<div class="bmpct" style="color:${b.accent}">${s.pct}%</div><div class="bmnum">${b.num}</div>`;
+    d.onclick=()=>{S.activeTab=b.id;render();};mc.appendChild(d);});
+  document.querySelectorAll(".tabbt").forEach(btn=>{
+    const active=btn.dataset.tab===S.activeTab;
+    btn.classList.toggle("active",active);
+    const acc=BLOQUES.find(b=>b.id===btn.dataset.tab)?.accent||"#52C7CF";
+    btn.style.borderBottomColor=active?acc:"transparent";
+    btn.style.color=active?"#111":"#999";
+    const cnt=btn.querySelector("[data-cnt]");
+    if(cnt){const b=BLOQUES.find(x=>x.id===cnt.dataset.cnt);if(b){const s=bstat(b);cnt.textContent=` ${s.done}/${s.total}`;cnt.style.color=s.done===s.total?"#80E593":"#bbb";}}
+  });
+  const area=document.getElementById("carea");
+  if(S.activeTab==="dashboard") renderDash(area,stats);
+  else renderSection(area,BLOQUES.find(x=>x.id===S.activeTab));
+}
+
+// ── SECTION ───────────────────────────────────────────────────
+function renderSection(area,b){
+  const s=bstat(b);
+  let h=`
+  <div class="seyebrow">Bloque ${b.num} · ${b.semana}</div>
+  <h2 class="sh2">${b.title}</h2>
+  <div class="smeta">
+    <span class="smetatxt">${s.done} de ${s.total} insumos entregados</span>
+    <div class="strack"><div class="sfill" style="width:${s.pct}%;background:${b.accent}"></div></div>
+    <span class="spct" style="color:${b.accent}">${s.pct}%</span>
+  </div>
+  ${b.nota?`<div class="nota">⚠️ ${b.nota}</div>`:""}`;
+
+  b.items.forEach(item=>{
+    const filled=isFilled(item),fl=(S.files[item.id]||[]);
+    h+=`<div class="icard${filled?" filled":""}" id="card_${item.id}">
+    <div class="itop">
+      <div class="ichk${filled?" done":""}">
+        ${filled?`<svg width="11" height="9" viewBox="0 0 11 9"><path d="M1 4l3 3 6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}
+      </div>
+      <div class="iinfo">
+        <div class="ilabel">${item.label}</div>
+        <div class="ibadges">
+          ${item.opc?`<span class="badge bopc">OPCIONAL</span>`:`<span class="badge breq" style="background:${b.accent}18;color:${b.accent==="#80E593"?"#1a6b2f":"#0f6e7a"}">OBLIGATORIO</span>`}
+          <span class="badge btipo">${item.tipo==="archivo"?"📎 Archivo":item.tipo==="confirm"?"✔ Confirmación":"✎ Texto"}</span>
+          ${filled?`<span class="badge" style="background:#f0fdf4;color:#2a8a4a">✓ Entregado</span>`:""}
+        </div>
+      </div>
+    </div>`;
+
+    if(item.desc){
+      h+=`<div class="idesc">ℹ️ ${item.desc}</div>`;
+    }
+
+    if(item.tipo==="confirm"){
+      h+=`<div class="crow${filled?" ck":""}" data-confirm="${item.id}">
+        <div class="cbox${filled?" ck":""}">
+          ${filled?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}
+        </div>
+        <span class="ctxt">${filled?"Confirmado — haz click para desmarcar":"Haz click para confirmar"}</span>
+      </div>`;
+    } else if(item.tipo==="texto"){
+      h+=`<textarea class="ita" rows="2" data-text="${item.id}" placeholder="Escribe aquí la información requerida...">${S.texts[item.id]||""}</textarea>`;
+    } else {
+      const hasHeavy=fl.some(f=>f.size>FILE_SIZE_LIMIT);
+      h+=`<div class="dz" id="dz_${item.id}" data-dz="${item.id}">
+        <input type="file" multiple id="fi_${item.id}" data-fi="${item.id}" style="display:none"/>
+        ${fl.length>0
+          ?`<div class="flist">${fl.map((f,fi)=>`<div class="frow">
+              <span class="fname">${f.name}</span>
+              <span class="fsize">(${(f.size/1024/1024).toFixed(1)} MB)</span>
+              ${f.size>FILE_SIZE_LIMIT?`<span class="fwarn">⚠ >25MB, será omitido</span>`:""}
+              <button class="frm" data-rm="${item.id}" data-fi="${fi}" title="Eliminar">×</button>
+            </div>`).join("")}</div>
+            ${hasHeavy?`<div style="font-size:11px;color:var(--warn);margin-bottom:6px">Archivos >25MB: comparte su link de Google Drive en un campo de texto.</div>`:""}
+            <div class="dzmore">+ Agregar más archivos</div>`
+          :`<div class="dzico">↑</div><div class="dztxt">Arrastra archivos aquí o haz click para seleccionar</div><div class="dzsub">Máximo 25 MB por archivo · Múltiples archivos permitidos</div>`}
+      </div>`;
+    }
+    h+=`</div>`;
+  });
+
+  const idx=BLOQUES.findIndex(x=>x.id===b.id);
+  const prev=idx>0?BLOQUES[idx-1]:null,next=idx<BLOQUES.length-1?BLOQUES[idx+1]:null;
+
+  let submitLabel="Enviar a Google Sheets →";
+  if(S.submitting) submitLabel=S.submitProgress||"Enviando…";
+  else if(S.submitOk) submitLabel="✓ Enviado correctamente";
+
+  h+=`<div class="navrow">
+    <div class="navbtns">
+      ${prev?`<button class="btnav" data-goto="${prev.id}">← ${prev.num} ${prev.title.split(" ")[0]}</button>`:"<span></span>"}
+      ${next?`<button class="btnav" data-goto="${next.id}">${next.num} ${next.title.split(" ")[0]} →</button>`:"<span></span>"}
+    </div>
+    ${b.id==="b4"?`<button class="btsub" id="subbtn"${S.submitting?" disabled":""}>${submitLabel}</button>`:""}
+  </div>
+  ${S.submitOk?`<div class="subok">
+    ✅ Información enviada correctamente. El equipo de Tita Media ha sido notificado.
+    ${S.submitSkipped.length>0?`<br><strong>⚠️ Archivos omitidos por tamaño (>25MB):</strong> ${S.submitSkipped.join(", ")} — comparte sus links de Drive directamente.`:""}
+  </div>`:""}
+  ${S.submitErr?`<div class="suberr">⚠️ Error al enviar. Verifica que el webhook esté configurado correctamente o intenta de nuevo.</div>`:""}`;
+
+  area.innerHTML=h;
+  bindSection(area,b);
+}
+
+function bindSection(area,b){
+  area.querySelectorAll("[data-confirm]").forEach(el=>el.onclick=()=>{S.confirmed[el.dataset.confirm]=!S.confirmed[el.dataset.confirm];render();});
+  area.querySelectorAll("[data-text]").forEach(ta=>{ta.oninput=e=>{S.texts[ta.dataset.text]=e.target.value;liveUpdateCard(ta.dataset.text);};});
+  area.querySelectorAll("[data-dz]").forEach(dz=>{
+    const id=dz.dataset.dz;
+    dz.onclick=e=>{if(!e.target.closest("[data-rm]"))document.getElementById("fi_"+id)?.click();};
+    dz.ondragover=e=>{e.preventDefault();dz.classList.add("drag");};
+    dz.ondragleave=()=>dz.classList.remove("drag");
+    dz.ondrop=e=>{e.preventDefault();dz.classList.remove("drag");addFiles(id,Array.from(e.dataTransfer.files));};
+  });
+  area.querySelectorAll("[data-fi]").forEach(inp=>inp.onchange=e=>addFiles(inp.dataset.fi,Array.from(e.target.files)));
+  area.querySelectorAll("[data-rm]").forEach(btn=>btn.onclick=e=>{
+    e.stopPropagation();const id=btn.dataset.rm,fi=parseInt(btn.dataset.fi);
+    S.files[id]=(S.files[id]||[]).filter((_,i)=>i!==fi);render();
+  });
+  area.querySelectorAll("[data-goto]").forEach(btn=>btn.onclick=()=>{S.activeTab=btn.dataset.goto;render();});
+  const sb=area.querySelector("#subbtn");if(sb)sb.onclick=doSubmit;
+}
+
+function addFiles(id,nf){S.files[id]=[...(S.files[id]||[]),...nf];render();}
+
+function liveUpdateCard(id){
+  const item=BLOQUES.flatMap(b=>b.items).find(i=>i.id===id);if(!item)return;
+  const card=document.getElementById("card_"+id);if(!card)return;
+  const filled=isFilled(item);
+  card.classList.toggle("filled",filled);
+  const chk=card.querySelector(".ichk");
+  if(chk){chk.classList.toggle("done",filled);chk.innerHTML=filled?`<svg width="11" height="9" viewBox="0 0 11 9"><path d="M1 4l3 3 6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}
+  const stats=getStats();
+  document.getElementById("stpct").innerHTML=stats.pct+'<span class="stsup">%</span>';
+  document.getElementById("stdone").innerHTML=stats.done+'<span class="stsup">/'+TOTAL+'</span>';
+  document.getElementById("mfill").style.width=stats.pct+"%";
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+async function doSubmit(){
+  if(S.submitting) return;
+  S.submitting=true;
+  S.submitOk=false;
+  S.submitErr=false;
+  S.submitSkipped=[];
+  render();
+
+  // Collect all uploadable files
+  const allFiles=[];
+  BLOQUES.forEach(b=>{
+    b.items.forEach(item=>{
+      if(item.tipo==="archivo"){
+        (S.files[item.id]||[]).forEach(f=>{
+          if(f.size<=FILE_SIZE_LIMIT) allFiles.push({file:f,item,bloque:b});
+          else S.submitSkipped.push(f.name);
+        });
+      }
+    });
+  });
+
+  const totalSteps=1+allFiles.length; // 1 text submission + N files
+  let step=0;
+
+  function setOverlay(label,sub,pct){
+    document.getElementById("uoverlay").style.display="flex";
+    document.getElementById("umod-title").textContent=label;
+    document.getElementById("umod-sub").textContent=sub;
+    document.getElementById("uprogfill").style.width=pct+"%";
+    document.getElementById("uprogpct").textContent=pct+"%";
+  }
+  function hideOverlay(){
+    document.getElementById("uoverlay").style.display="none";
+  }
+
+  try{
+    if(WEBHOOK==="TU_URL_APPS_SCRIPT_AQUI"){
+      // Demo mode
+      setOverlay("Modo demo","El webhook no está configurado. Simulando envío…",20);
+      await sleep(600);
+      setOverlay("Guardando texto…","Simulando guardado en Google Sheets…",50);
+      await sleep(600);
+      setOverlay("Subiendo archivos…","Simulando subida a Google Drive…",80);
+      await sleep(600);
+      S.submitOk=true;
+    } else {
+      const stats=getStats();
+
+      // Step 1: Send text/confirm data
+      setOverlay("Guardando respuestas…","Enviando datos de texto a Google Sheets…",5);
+      const textPayload={
+        action:"submit_texts",
+        timestamp:new Date().toISOString(),
+        empresa:"TechnoFood",
+        usuario:S.currentUser?.label||"",
+        avance:stats.pct+"%",
+        obligatorios:stats.pctReq+"%",
+        items:BLOQUES.flatMap(b=>b.items.map(i=>({
+          id:i.id,
+          bloque:b.num+" · "+b.title,
+          label:i.label,
+          tipo:i.tipo,
+          entregado:isFilled(i)?"SI":"NO",
+          valor:i.tipo==="confirm"
+            ?(S.confirmed[i.id]?"Confirmado":"Pendiente")
+            :i.tipo!=="archivo"
+            ?(S.texts[i.id]||"")
+            :""
+        })))
+      };
+      await postToScript(textPayload);
+      step++;
+      setOverlay("Texto guardado","Preparando archivos para subir a Google Drive…",Math.round(step/totalSteps*100));
+
+      // Step 2: Upload each file
+      for(const {file,item,bloque} of allFiles){
+        step++;
+        const pct=Math.round(step/totalSteps*100);
+        setOverlay(
+          `Subiendo archivos (${step-1}/${allFiles.length})`,
+          `"${file.name}" → ${bloque.num} · ${bloque.title}`,
+          pct
+        );
+        const base64=await fileToBase64(file);
+        await postToScript({
+          action:"upload_file",
+          fileName:file.name,
+          mimeType:file.type||"application/octet-stream",
+          base64Data:base64,
+          fileSize:file.size,
+          itemId:item.id,
+          itemLabel:item.label,
+          bloque:bloque.num+" · "+bloque.title,
+          usuario:S.currentUser?.label||"",
+          empresa:"TechnoFood"
+        });
+      }
+
+      S.submitOk=true;
+    }
+  }catch(err){
+    console.error("Submit error:",err);
+    S.submitErr=true;
+  }
+
+  S.submitting=false;
+  S.submitProgress="";
+  hideOverlay();
+  render();
+}
+
+async function postToScript(payload){
+  // Content-Type: text/plain avoids CORS preflight with Apps Script
+  const res=await fetch(WEBHOOK,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  let json;
+  try{json=await res.json();}catch{return;} // Apps Script may redirect
+  if(json&&json.success===false) throw new Error(json.error||"Error en servidor");
+  return json;
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=e=>resolve(e.target.result.split(",")[1]);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+function renderDash(area,stats){
+  if(S.dashChart){S.dashChart.destroy();S.dashChart=null;}
+  const estado=stats.pct===100?"✅ Completo":stats.pct>=75?"🟡 Avanzado":stats.pct>=40?"🟠 En curso":"🔴 Inicial";
+  const estCol=stats.pct===100?"#2a8a4a":stats.pct>=75?"#8a5a00":stats.pct>=40?"#7a4500":"#c04040";
+  const fecha=new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
+  area.innerHTML=`
+  <div class="deyebrow">Informe · Proyecto TechnoFood × Tita Media</div>
+  <h2 class="dh2">Dashboard de cumplimiento</h2>
+  <p class="dsub">Estado de entrega de insumos · ${fecha}</p>
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">Avance total</div><div class="kval">${stats.pct}%</div><div class="ksub">${stats.done} de ${TOTAL} insumos</div></div>
+    <div class="kcard"><div class="klbl">Obligatorios</div><div class="kval" style="color:var(--cyan)">${stats.pctReq}%</div><div class="ksub">${stats.doneReq} de ${TOTAL_REQ} ítems</div></div>
+    <div class="kcard"><div class="klbl">Pendientes</div><div class="kval" style="color:var(--warn)">${TOTAL-stats.done}</div><div class="ksub">insumos por entregar</div></div>
+    <div class="kcard"><div class="klbl">Estado</div><div class="kval" style="color:${estCol};font-size:20px">${estado}</div><div class="ksub">${stats.pct<100?"Faltan "+(TOTAL-stats.done)+" ítems":"Listo para avanzar"}</div></div>
+  </div>
+  <div class="cgrid">
+    <div class="ccard">
+      <div class="cey">Avance por bloque</div>
+      <div class="bbars">
+        ${BLOQUES.map(b=>{const s=bstat(b);return`<div><div class="bbrh"><span class="bbrt"><span style="color:${b.accent};font-weight:500">${b.num}</span> ${b.title}</span><span class="bbrc" style="color:${b.accent}">${s.done}/${s.total}</span></div><div class="bbrtr"><div class="bbrf" style="width:${s.pct}%;background:${b.accent}"></div></div><div class="bbrp">${s.pct}%</div></div>`;}).join("")}
+      </div>
+    </div>
+    <div class="ccard">
+      <div class="cey">Entregados vs Pendientes</div>
+      <div class="cleg"><span><span class="ldot" style="background:#52C7CF"></span>Entregados</span><span><span class="ldot" style="background:#eeede8"></span>Pendientes</span></div>
+      <div style="position:relative;height:200px"><canvas id="barchart" role="img" aria-label="Gráfica entregados vs pendientes por bloque"></canvas></div>
+    </div>
+  </div>
+  <div class="detcard">
+    <div class="detey">Detalle completo — ${TOTAL} insumos</div>
+    ${BLOQUES.map(b=>{const s=bstat(b);return`
+    <div style="margin-bottom:22px">
+      <div class="bdh"><span class="bdnum" style="color:${b.accent}">${b.num}</span><span class="bdtit">${b.title}</span><span class="bdcnt">${s.done}/${s.total}</span><div class="bdmb"><div class="bdmf" style="width:${s.pct}%;background:${b.accent}"></div></div></div>
+      <div class="igrid">${b.items.map(item=>{const done=isFilled(item);return`<div class="idet${done?" dr":""}"><span class="idot" style="color:${done?b.accent:"#ddd"}">${done?"●":"○"}</span><span class="idlbl" style="color:${done?"#111":"#aaa"}">${item.label}</span>${item.opc?`<span class="idopc">OPC</span>`:""}</div>`;}).join("")}</div>
+    </div>`;}).join("")}
+  </div>
+  <div class="snote"><strong>🔗 Google Sheets + Drive:</strong> Al enviar, los textos se registran en Google Sheets y los archivos se guardan en Google Drive organizados por bloque e ítem.${WEBHOOK==="TU_URL_APPS_SCRIPT_AQUI"?' <strong style="color:var(--danger)">⚠️ Webhook no configurado aún.</strong>':' <strong>✅ Webhook activo.</strong>'}</div>`;
+
+  const canvas=document.getElementById("barchart");
+  if(canvas){S.dashChart=new Chart(canvas,{type:"bar",data:{labels:BLOQUES.map(b=>b.num+" "+b.title.split(" ")[0]),datasets:[{label:"Entregados",data:BLOQUES.map(b=>bstat(b).done),backgroundColor:"#52C7CF",borderRadius:5,borderSkipped:false},{label:"Pendientes",data:BLOQUES.map(b=>bstat(b).total-bstat(b).done),backgroundColor:"#eeede8",borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:"#888"}},y:{grid:{color:"#f5f5f2"},ticks:{font:{size:10},color:"#bbb"},beginAtZero:true}}}});}
+}
+</script>
+</body>
+</html>
