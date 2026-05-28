@@ -480,16 +480,16 @@ function renderSection(area,b){
   const idx=BLOQUES.findIndex(x=>x.id===b.id);
   const prev=idx>0?BLOQUES[idx-1]:null,next=idx<BLOQUES.length-1?BLOQUES[idx+1]:null;
 
-  let submitLabel="Enviar a Google Sheets →";
-  if(S.submitting) submitLabel=S.submitProgress||"Enviando…";
-  else if(S.submitOk) submitLabel="✓ Enviado correctamente";
+  let submitLabel="💾 Guardar en Google Sheets";
+  if(S.submitting) submitLabel=S.submitProgress||"Guardando…";
+  else if(S.submitOk) submitLabel="✓ Guardado correctamente";
 
   h+=`<div class="navrow">
     <div class="navbtns">
       ${prev?`<button class="btnav" data-goto="${prev.id}">← ${prev.num} ${prev.title.split(" ")[0]}</button>`:"<span></span>"}
       ${next?`<button class="btnav" data-goto="${next.id}">${next.num} ${next.title.split(" ")[0]} →</button>`:"<span></span>"}
     </div>
-    ${b.id==="b4"?`<button class="btsub" id="subbtn"${S.submitting?" disabled":""}>${submitLabel}</button>`:""}
+    <button class="btsub" id="subbtn"${S.submitting?" disabled":""}>${submitLabel}</button>
   </div>
   ${S.submitOk?`<div class="subok">
     ✅ Información enviada correctamente. El equipo de Tita Media ha sido notificado.
@@ -648,14 +648,11 @@ async function doSubmit(){
 }
 
 async function postToScript(payload){
-  // mode:"no-cors" bypasses the CORS redirect issue inherent to Apps Script Web Apps.
-  // The request and body reach doPost() correctly; we just can't read the opaque response.
-  await fetch(WEBHOOK,{
-    method:"POST",
-    mode:"no-cors",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify(payload)
-  });
+  // URLSearchParams sends Content-Type: application/x-www-form-urlencoded,
+  // a CORS-safelisted type — no preflight, and Apps Script reads it via e.parameter.data
+  const params=new URLSearchParams();
+  params.set("data",JSON.stringify(payload));
+  await fetch(WEBHOOK,{method:"POST",body:params});
 }
 
 function fileToBase64(file){

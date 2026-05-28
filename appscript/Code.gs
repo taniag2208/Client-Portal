@@ -34,15 +34,23 @@ function doGet() {
 }
 
 function doPost(e) {
-  var result = { success: false, error: "Acción desconocida" };
+  var result = { success: false, error: "Sin datos" };
   try {
-    var payload = JSON.parse(e.postData.contents);
+    // Accept URL-encoded form POST (e.parameter.data) or raw text POST (e.postData.contents)
+    var raw = (e.parameter && e.parameter.data)
+           || (e.postData && e.postData.contents);
+    if (!raw) throw new Error("No se recibieron datos en el POST");
+    var payload = JSON.parse(raw);
+    Logger.log("doPost recibido — action: " + payload.action + " | usuario: " + payload.usuario);
     if (payload.action === "submit_texts") {
       result = handleTexts(payload);
     } else if (payload.action === "upload_file") {
       result = handleFileUpload(payload);
+    } else {
+      result = { success: false, error: "Acción desconocida: " + payload.action };
     }
   } catch (err) {
+    Logger.log("doPost ERROR: " + err.toString());
     result = { success: false, error: err.toString() };
   }
   return ContentService
