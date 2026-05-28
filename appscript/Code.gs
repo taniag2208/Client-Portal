@@ -15,6 +15,17 @@
 const DRIVE_FOLDER_ID = "1OnyMdyysidFvkv_0QMthuD0HR_NooWV4";
 const SPREADSHEET_NAME = "TechnoFood · Insumos Portal";
 
+// ── Autorización inicial ──────────────────────────────────────
+// Ejecuta esta función UNA VEZ desde el editor de Apps Script
+// para autorizar el acceso a Drive y Sheets antes de usar el portal.
+function setup() {
+  var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  Logger.log("✅ Carpeta de Drive encontrada: " + folder.getName());
+  var ss = getSpreadsheet();
+  Logger.log("✅ Spreadsheet lista: " + ss.getName() + " — " + ss.getUrl());
+  Logger.log("✅ Setup completo. El portal puede enviar datos.");
+}
+
 // ── Entry point ───────────────────────────────────────────────
 function doGet() {
   return ContentService

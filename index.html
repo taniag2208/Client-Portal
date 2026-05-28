@@ -648,17 +648,14 @@ async function doSubmit(){
 }
 
 async function postToScript(payload){
-  // Content-Type: text/plain avoids CORS preflight with Apps Script
-  const res=await fetch(WEBHOOK,{
+  // mode:"no-cors" bypasses the CORS redirect issue inherent to Apps Script Web Apps.
+  // The request and body reach doPost() correctly; we just can't read the opaque response.
+  await fetch(WEBHOOK,{
     method:"POST",
+    mode:"no-cors",
     headers:{"Content-Type":"text/plain"},
     body:JSON.stringify(payload)
   });
-  if(!res.ok) throw new Error("HTTP "+res.status);
-  let json;
-  try{json=await res.json();}catch{return;} // Apps Script may redirect
-  if(json&&json.success===false) throw new Error(json.error||"Error en servidor");
-  return json;
 }
 
 function fileToBase64(file){
