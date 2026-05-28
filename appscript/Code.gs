@@ -91,37 +91,38 @@ function getOrCreateSheet(ss, name, headers) {
 // ── Handler: text / confirm items → Sheets ────────────────────
 function handleTexts(payload) {
   var ss = getSpreadsheet();
-
-  // --- Sheet "Respuestas" ---
-  var sheet = getOrCreateSheet(ss, "Respuestas", [
+  var headers = [
     "Timestamp", "Empresa", "Usuario",
     "Avance Total", "Obligatorios",
     "Bloque", "Item ID", "Etiqueta",
     "Tipo", "Entregado", "Valor"
-  ]);
+  ];
+  var sheet = getOrCreateSheet(ss, "Respuestas", headers);
+
+  // Clear previous data rows (keep header) — prevents duplicates on repeated saves
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+  }
 
   var timestamp = new Date();
+  var rows = [];
   payload.items.forEach(function (item) {
     if (item.tipo !== "archivo") {
-      sheet.appendRow([
-        timestamp,
-        payload.empresa,
-        payload.usuario,
-        payload.avance,
-        payload.obligatorios,
-        item.bloque,
-        item.id,
-        item.label,
-        item.tipo,
-        item.entregado,
-        item.valor
+      rows.push([
+        timestamp, payload.empresa, payload.usuario,
+        payload.avance, payload.obligatorios,
+        item.bloque, item.id, item.label,
+        item.tipo, item.entregado, item.valor
       ]);
     }
   });
 
-  // --- Sheet "Resumen" ---
-  refreshSummary(ss, payload);
+  if (rows.length > 0) {
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  }
 
+  refreshSummary(ss, payload);
   return { success: true };
 }
 

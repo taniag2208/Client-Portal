@@ -102,8 +102,13 @@ input,textarea{font-family:'Be Vietnam Pro',sans-serif}
 .crow.ck .ctxt{color:var(--ink)}
 
 /* TEXTAREA */
+.tawrap{position:relative}
 .ita{width:100%;border:1px solid var(--faint);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--ink);background:#fafaf8;outline:none;resize:vertical;line-height:1.55;transition:border-color .15s}
 .ita:focus{border-color:var(--cyan)}
+.ita.locked{background:#f5f5f2;color:var(--ink);border-color:#e5e5e0;cursor:default;resize:none}
+.locksave{position:absolute;bottom:8px;right:8px;padding:3px 11px;background:rgba(255,255,255,0.88);border:1px solid var(--faint);border-radius:6px;font-size:11px;color:var(--mid);backdrop-filter:blur(4px);transition:all .15s}
+.locksave:hover{background:#fff;border-color:var(--muted)}
+.locksave.edit{background:rgba(82,199,207,0.08);border-color:var(--cyan);color:var(--cyan)}
 
 /* DROPZONE */
 .dz{border:1.5px dashed #d5d5d0;border-radius:11px;padding:20px;text-align:center;cursor:pointer;background:#fafaf8;transition:all .2s}
@@ -262,7 +267,7 @@ const USERS = [
 // ── INSUMOS ─────────────────────────────────────────────────
 const BLOQUES = [
  {id:"b1",num:"01",title:"Base & Accesos",semana:"Semana 1",accent:"#52C7CF",items:[
-  {id:"b1_1",label:"Confirmación formal del Product Owner + backup",tipo:"confirm",req:true,
+  {id:"b1_1",label:"Confirmación formal del Product Owner + backup",tipo:"texto",req:true,
    desc:"Confirma que la persona responsable de aprobar decisiones del proyecto (Product Owner) ha sido designada formalmente, junto con su suplente o backup en caso de ausencia."},
   {id:"b1_2",label:"Contacto técnico de SAMM (nombre, email, celular)",tipo:"texto",req:true,
    desc:"Nombre completo, correo electrónico corporativo y número celular (con indicativo) de la persona técnica de SAMM que será el punto de contacto durante la integración.<br><strong>Formato:</strong> Nombre Apellido | correo@empresa.com | +57 300 000 0000"},
@@ -333,6 +338,7 @@ let S={
   confirmed:{},
   texts:{},
   files:{},
+  locked:{},
   submitting:false,
   submitOk:false,
   submitErr:false,
@@ -382,12 +388,12 @@ function buildTabs(){
     const btn=document.createElement("button");
     btn.className="tabbt";btn.dataset.tab=b.id;
     btn.innerHTML=`${b.num} · ${b.title} <span data-cnt="${b.id}" style="font-size:11px"></span>`;
-    btn.onclick=()=>{S.activeTab=b.id;render();};
+    btn.onclick=()=>{S.activeTab=b.id;S.submitOk=false;render();};
     nav.appendChild(btn);
   });
   const d=document.createElement("button");
   d.className="tabbt";d.dataset.tab="dashboard";d.textContent="📊 Dashboard";
-  d.onclick=()=>{S.activeTab="dashboard";render();};
+  d.onclick=()=>{S.activeTab="dashboard";S.submitOk=false;render();};
   nav.appendChild(d);
 }
 
@@ -400,7 +406,7 @@ function render(){
   const mc=document.getElementById("bminis");mc.innerHTML="";
   BLOQUES.forEach(b=>{const s=bstat(b);const d=document.createElement("div");d.className="bmini";
     d.innerHTML=`<div class="bmpct" style="color:${b.accent}">${s.pct}%</div><div class="bmnum">${b.num}</div>`;
-    d.onclick=()=>{S.activeTab=b.id;render();};mc.appendChild(d);});
+    d.onclick=()=>{S.activeTab=b.id;S.submitOk=false;render();};mc.appendChild(d);});
   document.querySelectorAll(".tabbt").forEach(btn=>{
     const active=btn.dataset.tab===S.activeTab;
     btn.classList.toggle("active",active);
@@ -457,7 +463,11 @@ function renderSection(area,b){
         <span class="ctxt">${filled?"Confirmado — haz click para desmarcar":"Haz click para confirmar"}</span>
       </div>`;
     } else if(item.tipo==="texto"){
-      h+=`<textarea class="ita" rows="2" data-text="${item.id}" placeholder="Escribe aquí la información requerida...">${S.texts[item.id]||""}</textarea>`;
+      const locked=!!S.locked[item.id];
+      h+=`<div class="tawrap">
+        <textarea class="ita${locked?" locked":""}" rows="2" data-text="${item.id}" placeholder="Escribe aquí la información requerida..."${locked?" readonly":""}>${S.texts[item.id]||""}</textarea>
+        <button class="locksave${locked?" edit":""}" data-lock="${item.id}">${locked?"✏ Editar":"Guardar"}</button>
+      </div>`;
     } else {
       const hasHeavy=fl.some(f=>f.size>FILE_SIZE_LIMIT);
       h+=`<div class="dz" id="dz_${item.id}" data-dz="${item.id}">
@@ -480,9 +490,8 @@ function renderSection(area,b){
   const idx=BLOQUES.findIndex(x=>x.id===b.id);
   const prev=idx>0?BLOQUES[idx-1]:null,next=idx<BLOQUES.length-1?BLOQUES[idx+1]:null;
 
-  let submitLabel="💾 Guardar en Google Sheets";
-  if(S.submitting) submitLabel=S.submitProgress||"Guardando…";
-  else if(S.submitOk) submitLabel="✓ Guardado correctamente";
+  let submitLabel="💾 Guardar";
+  if(S.submitting) submitLabel="Guardando…";
 
   h+=`<div class="navrow">
     <div class="navbtns">
@@ -492,10 +501,10 @@ function renderSection(area,b){
     <button class="btsub" id="subbtn"${S.submitting?" disabled":""}>${submitLabel}</button>
   </div>
   ${S.submitOk?`<div class="subok">
-    ✅ Información enviada correctamente. El equipo de Tita Media ha sido notificado.
-    ${S.submitSkipped.length>0?`<br><strong>⚠️ Archivos omitidos por tamaño (>25MB):</strong> ${S.submitSkipped.join(", ")} — comparte sus links de Drive directamente.`:""}
+    ✅ Información guardada correctamente.
+    ${S.submitSkipped.length>0?`<br><strong>⚠️ Archivos omitidos por tamaño (>25MB):</strong> ${S.submitSkipped.join(", ")} — comparte sus links directamente.`:""}
   </div>`:""}
-  ${S.submitErr?`<div class="suberr">⚠️ Error al enviar. Verifica que el webhook esté configurado correctamente o intenta de nuevo.</div>`:""}`;
+  ${S.submitErr?`<div class="suberr">⚠️ No se pudo guardar. Por favor intenta de nuevo.</div>`:""}`;
 
   area.innerHTML=h;
   bindSection(area,b);
@@ -516,7 +525,8 @@ function bindSection(area,b){
     e.stopPropagation();const id=btn.dataset.rm,fi=parseInt(btn.dataset.fi);
     S.files[id]=(S.files[id]||[]).filter((_,i)=>i!==fi);render();
   });
-  area.querySelectorAll("[data-goto]").forEach(btn=>btn.onclick=()=>{S.activeTab=btn.dataset.goto;render();});
+  area.querySelectorAll("[data-goto]").forEach(btn=>btn.onclick=()=>{S.activeTab=btn.dataset.goto;S.submitOk=false;render();});
+  area.querySelectorAll("[data-lock]").forEach(btn=>btn.onclick=()=>{S.locked[btn.dataset.lock]=!S.locked[btn.dataset.lock];render();});
   const sb=area.querySelector("#subbtn");if(sb)sb.onclick=doSubmit;
 }
 
@@ -574,18 +584,18 @@ async function doSubmit(){
   try{
     if(WEBHOOK==="TU_URL_APPS_SCRIPT_AQUI"){
       // Demo mode
-      setOverlay("Modo demo","El webhook no está configurado. Simulando envío…",20);
+      setOverlay("Guardando…","Procesando información…",20);
       await sleep(600);
-      setOverlay("Guardando texto…","Simulando guardado en Google Sheets…",50);
+      setOverlay("Guardando…","Guardando respuestas…",50);
       await sleep(600);
-      setOverlay("Subiendo archivos…","Simulando subida a Google Drive…",80);
+      setOverlay("Guardando archivos…","Procesando archivos…",80);
       await sleep(600);
       S.submitOk=true;
     } else {
       const stats=getStats();
 
       // Step 1: Send text/confirm data
-      setOverlay("Guardando respuestas…","Enviando datos de texto a Google Sheets…",5);
+      setOverlay("Guardando…","Por favor no cierres esta ventana.",5);
       const textPayload={
         action:"submit_texts",
         timestamp:new Date().toISOString(),
@@ -608,15 +618,15 @@ async function doSubmit(){
       };
       await postToScript(textPayload);
       step++;
-      setOverlay("Texto guardado","Preparando archivos para subir a Google Drive…",Math.round(step/totalSteps*100));
+      setOverlay("Guardando…","Por favor no cierres esta ventana.",Math.round(step/totalSteps*100));
 
       // Step 2: Upload each file
       for(const {file,item,bloque} of allFiles){
         step++;
         const pct=Math.round(step/totalSteps*100);
         setOverlay(
-          `Subiendo archivos (${step-1}/${allFiles.length})`,
-          `"${file.name}" → ${bloque.num} · ${bloque.title}`,
+          `Guardando archivos (${step-1}/${allFiles.length})`,
+          `Por favor no cierres esta ventana.`,
           pct
         );
         const base64=await fileToBase64(file);
@@ -703,7 +713,7 @@ function renderDash(area,stats){
       <div class="igrid">${b.items.map(item=>{const done=isFilled(item);return`<div class="idet${done?" dr":""}"><span class="idot" style="color:${done?b.accent:"#ddd"}">${done?"●":"○"}</span><span class="idlbl" style="color:${done?"#111":"#aaa"}">${item.label}</span>${item.opc?`<span class="idopc">OPC</span>`:""}</div>`;}).join("")}</div>
     </div>`;}).join("")}
   </div>
-  <div class="snote"><strong>🔗 Google Sheets + Drive:</strong> Al enviar, los textos se registran en Google Sheets y los archivos se guardan en Google Drive organizados por bloque e ítem.${WEBHOOK==="TU_URL_APPS_SCRIPT_AQUI"?' <strong style="color:var(--danger)">⚠️ Webhook no configurado aún.</strong>':' <strong>✅ Webhook activo.</strong>'}</div>`;
+  <div class="snote"><strong>💡 Sincronización automática:</strong> Cada vez que el cliente guarda, el equipo de Tita Media recibe la información de forma inmediata.${WEBHOOK==="TU_URL_APPS_SCRIPT_AQUI"?' <strong style="color:var(--danger)">⚠️ Integración no configurada.</strong>':' <strong>✅ Integración activa.</strong>'}</div>`;
 
   const canvas=document.getElementById("barchart");
   if(canvas){S.dashChart=new Chart(canvas,{type:"bar",data:{labels:BLOQUES.map(b=>b.num+" "+b.title.split(" ")[0]),datasets:[{label:"Entregados",data:BLOQUES.map(b=>bstat(b).done),backgroundColor:"#52C7CF",borderRadius:5,borderSkipped:false},{label:"Pendientes",data:BLOQUES.map(b=>bstat(b).total-bstat(b).done),backgroundColor:"#eeede8",borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:"#888"}},y:{grid:{color:"#f5f5f2"},ticks:{font:{size:10},color:"#bbb"},beginAtZero:true}}}});}
