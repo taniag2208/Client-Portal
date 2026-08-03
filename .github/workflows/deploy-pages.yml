@@ -3,7 +3,6 @@ name: Deploy portal to GitHub Pages
 on:
   push:
     branches:
-      - claude/client-portal-sheets-insumos-d7csnm
       - main
   workflow_dispatch:
 
