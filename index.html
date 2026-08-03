@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simón Movilidad · Client Portal · Discovery</title>
+  <meta name="description" content="Portal de Discovery para Simón Movilidad — insumos previos y preguntas por sección. Tita Media." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div class="brand-text">
+          <strong>Simón Movilidad</strong>
+          <span>Client Portal</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-view="resumen">
+          <span class="nav-ico">◆</span> Resumen
+        </button>
+        <button class="nav-item" data-view="insumos">
+          <span class="nav-ico">▦</span> Insumos previos
+        </button>
+        <button class="nav-item" data-view="preguntas">
+          <span class="nav-ico">❯</span> Preguntas Discovery
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span class="agency">Tita Media</span>
+        <span class="muted">Metodología CRO · 2026</span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+        <div class="topbar-title">
+          <h1 id="viewTitle">Resumen</h1>
+          <p id="viewSub" class="muted"></p>
+        </div>
+        <div class="sync-badge" id="syncBadge" title="Estado de conexión con Google Sheets">
+          <span class="dot"></span><span id="syncText">Sheets</span>
+        </div>
+      </header>
+
+      <section class="content" id="content"><!-- vistas inyectadas por JS --></section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
